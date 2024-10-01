@@ -48,42 +48,56 @@ class ForwardKinematics(Node):
             ])
 
         def rotation_y(angle):
-            return 
-            ## TODO: Implement the rotation matrix about the y-axis
-            # return np.array([
-            # ])
+            return np.array([
+                [np.cos(angle), 0, np.sin(angle), 0],
+                [0, 1, 0, 0],
+                [-np.sin(angle), 0, np.cos(angle), 0],
+                [0, 0, 0, 1]
+            ])
         
         def rotation_z(angle):
-            return
-            ## TODO: Implement the rotation matrix about the z-axis
-            # return np.array([
-            # ])
+            return np.array([
+                [np.cos(angle), -np.sin(angle), 0, 0],
+                [np.sin(angle), np.cos(angle), 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
+            ])
 
         def translation(x, y, z):
-            ## TODO: Implement the translation matrix
-            # return np.array([
-            # ])
+            # TODO: Implement the translation matrix
+            return np.array([
+                [1, 0, 0, x],
+                [0, 1, 0, y],
+                [0, 0, 1, z],
+                [0, 0, 0, 1]
+            ])
             None
 
+        # The translation values are the arm length values
+
         # T_0_1 (base_link to leg_front_r_1)
+        # translate position to that of motor, then rotate by 90 degrees about the x-axis so z matches axis of motor rotation
+        #       The position we desire (given)     Rotate the z-axis across the x-axis by 90 (pi/2)   Match z to whatever angle the motor is at (since z represents what we want to rotate)
         T_0_1 = translation(0.07500, -0.0445, 0) @ rotation_x(1.57080) @ rotation_z(theta1)
 
         # T_1_2 (leg_front_r_1 to leg_front_r_2)
         ## TODO: Implement the transformation matrix from leg_front_r_1 to leg_front_r_2
-        T_1_2 = None
+        T_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(theta2)
+
 
         # T_2_3 (leg_front_r_2 to leg_front_r_3)
         ## TODO: Implement the transformation matrix from leg_front_r_2 to leg_front_r_3
-        T_2_3 = None
+        T_2_3 = translation(0.0, -0.0494, 0.0685) @ rotation_y(1.57080) @ rotation_z(theta3)
 
         # T_3_ee (leg_front_r_3 to end-effector)
-        T_3_ee = None
+        T_3_ee = translation(0.06231, -0.06216, 0.018) 
 
         # TODO: Compute the final transformation. T_0_ee is a concatenation of the previous transformation matrices
-        T_0_ee = None
+        T_0_ee = T_0_1 @ T_1_2 @ T_2_3 @ T_3_ee
 
         # TODO: Extract the end-effector position. The end effector position is a 3x3 matrix (not in homogenous coordinates)
-        end_effector_position = None
+        # 0 : 3 encompasses rows 0, 1, 2 b/c exclusive bound, then the 3 is the 3rd column which has our x, y, z
+        end_effector_position = T_0_ee[0:3 , 3]
 
         return end_effector_position
 
