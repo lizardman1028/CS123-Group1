@@ -5,7 +5,7 @@ from std_msgs.msg import Float64MultiArray
 import numpy as np
 np.set_printoptions(precision=3, suppress=True)
 
-Kp = 3
+Kp = .000005
 Kd = 0.1
 
 class InverseKinematics(Node):
@@ -116,7 +116,7 @@ class InverseKinematics(Node):
         return end_effector_position
 
 
-    def inverse_kinematics(self, target_ee, initial_guess=[0, 0, 0]):
+    def inverse_kinematics(self, target_ee, initial_guess=[1000, -1000, 1655489]):
         def cost_function(theta):
             # Compute the cost function and the L1 norm of the error
             # return the cost and the L1 norm of the error
@@ -124,7 +124,7 @@ class InverseKinematics(Node):
             current_ee = self.forward_kinematics(theta[0], theta[1], theta[2])
             cost_dist = target_ee - current_ee
             ################################################################################################
-            return np.sum(cost_dist * cost_dist), cost_dist
+            return np.sum(cost_dist * cost_dist), np.sum(np.abs(cost_dist))
 
         def gradient(theta, epsilon=1e-3):
             # Compute the gradient of the cost function using finite differences
@@ -142,12 +142,12 @@ class InverseKinematics(Node):
             grad3 = (cost_function(theta3)[0] - cost_function(theta)[0])/epsilon
 
             ################################################################################################
-            return np.array(grad1, grad2, grad3)
+            return np.array([grad1, grad2, grad3])
 
         theta = np.array(initial_guess)
-        learning_rate = 10**-3 # TODO: Set the learning rate
+        learning_rate = 10 # TODO: Set the learning rate
         max_iterations = 200 # TODO: Set the maximum number of iterations
-        tolerance = 0.05 # TODO: Set the tolerance for the L1 norm of the error
+        tolerance = 1e-3# TODO: Set the tolerance for the L1 norm of the error
 
         cost_l = []
         for _ in range(max_iterations):
@@ -172,9 +172,20 @@ class InverseKinematics(Node):
         # Intepolate between the three triangle positions in the self.ee_triangle_positions
         # based on the current time t
         ################################################################################################
-        triangle = np.interp(t, self.ee_triangle_positions, self.inverse_kinematics(self.ee_triangle_positions), 3000)
+        if (t % 3 < 1):
+            x = np.interp(t%1, [0, 1], [self.ee_triangle_positions[0][0], self.ee_triangle_positions[1][0]])
+            y = np.interp(t%1, [0, 1], [self.ee_triangle_positions[0][1], self.ee_triangle_positions[1][1]])
+            z = np.interp(t%1, [0, 1], [self.ee_triangle_positions[0][2], self.ee_triangle_positions[1][2]])
+        elif (t % 3 < 2):
+            x = np.interp(t%1, [0, 1], [self.ee_triangle_positions[1][0], self.ee_triangle_positions[2][0]])
+            y = np.interp(t%1, [0, 1], [self.ee_triangle_positions[1][1], self.ee_triangle_positions[2][1]])
+            z = np.interp(t%1, [0, 1], [self.ee_triangle_positions[1][2], self.ee_triangle_positions[2][2]])
+        else:
+            x = np.interp(t%1, [0, 1], [self.ee_triangle_positions[2][0], self.ee_triangle_positions[0][0]])
+            y = np.interp(t%1, [0, 1], [self.ee_triangle_positions[2][1], self.ee_triangle_positions[0][1]])
+            z = np.interp(t%1, [0, 1], [self.ee_triangle_positions[2][2], self.ee_triangle_positions[0][2]])        
         ################################################################################################
-        return triangle
+        return np.array([x, y, z])
 
     def ik_timer_callback(self):
         if self.joint_positions is not None:
@@ -184,13 +195,13 @@ class InverseKinematics(Node):
 
             # update the current time for the triangle interpolation
             ################################################################################################
-            # TODO: Implement the time update
+            self.t += self.ik_timer_period
             ################################################################################################
             
             self.get_logger().info(f'Target EE: {target_ee}, Current EE: {current_ee}, Target Angles: {self.target_joint_positions}, Target Angles to EE: {self.forward_kinematics(*self.target_joint_positions)}, Current Angles: {self.joint_positions}')
 
     def pd_timer_callback(self):
-        if self.joint_positions is not None:
+        if self.target_joint_positions is not None:
 
             command_msg = Float64MultiArray()
             command_msg.data = self.target_joint_positions.tolist()
