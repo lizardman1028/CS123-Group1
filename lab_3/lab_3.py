@@ -172,9 +172,9 @@ class InverseKinematics(Node):
         # Intepolate between the three triangle positions in the self.ee_triangle_positions
         # based on the current time t
         ################################################################################################
-        # TODO: Implement the interpolation function
+        triangle = np.interp(t, self.ee_triangle_positions, self.inverse_kinematics(self.ee_triangle_positions), 3000)
         ################################################################################################
-        return
+        return triangle
 
     def ik_timer_callback(self):
         if self.joint_positions is not None:
