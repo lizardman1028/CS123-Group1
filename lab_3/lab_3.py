@@ -51,31 +51,103 @@ class InverseKinematics(Node):
         self.joint_velocities = np.array([msg.velocity[msg.name.index(joint)] for joint in joints_of_interest])
 
     def forward_kinematics(self, theta1, theta2, theta3):
-        ################################################################################################
-        # TODO: paste lab 2 forward kinematics here
-        ################################################################################################
-        return
+       
+        def rotation_x(angle):
+            # rotation about the x-axis implemented for you
+            return np.array([
+                [1, 0, 0, 0],
+                [0, np.cos(angle), -np.sin(angle), 0],
+                [0, np.sin(angle), np.cos(angle), 0],
+                [0, 0, 0, 1]
+            ])
+
+        def rotation_y(angle):
+            return np.array([
+                [np.cos(angle), 0, np.sin(angle), 0],
+                [0, 1, 0, 0],
+                [-np.sin(angle), 0, np.cos(angle), 0],
+                [0, 0, 0, 1]
+            ])
+        
+        def rotation_z(angle):
+            return np.array([
+                [np.cos(angle), -np.sin(angle), 0, 0],
+                [np.sin(angle), np.cos(angle), 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
+            ])
+
+        def translation(x, y, z):
+            # TODO: Implement the translation matrix
+            return np.array([
+                [1, 0, 0, x],
+                [0, 1, 0, y],
+                [0, 0, 1, z],
+                [0, 0, 0, 1]
+            ])
+            None
+
+        # The translation values are the arm length values
+
+        # T_0_1 (base_link to leg_front_r_1)
+        # translate position to that of motor, then rotate by 90 degrees about the x-axis so z matches axis of motor rotation
+        #       The position we desire (given)     Rotate the z-axis across the x-axis by 90 (pi/2)   Match z to whatever angle the motor is at (since z represents what we want to rotate)
+        T_0_1 = translation(0.07500, -0.0445, 0) @ rotation_x(1.57080) @ rotation_z(theta1)
+
+        # T_1_2 (leg_front_r_1 to leg_front_r_2)
+        ## TODO: Implement the transformation matrix from leg_front_r_1 to leg_front_r_2
+        T_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(theta2)
+
+
+        # T_2_3 (leg_front_r_2 to leg_front_r_3)
+        ## TODO: Implement the transformation matrix from leg_front_r_2 to leg_front_r_3
+        T_2_3 = translation(0.0, -0.0494, 0.0685) @ rotation_y(1.57080) @ rotation_z(theta3)
+
+        # T_3_ee (leg_front_r_3 to end-effector)
+        T_3_ee = translation(0.06231, -0.06216, 0.018) 
+
+        # TODO: Compute the final transformation. T_0_ee is a concatenation of the previous transformation matrices
+        T_0_ee = T_0_1 @ T_1_2 @ T_2_3 @ T_3_ee
+
+        # TODO: Extract the end-effector position. The end effector position is a 3x3 matrix (not in homogenous coordinates)
+        # 0 : 3 encompasses rows 0, 1, 2 b/c exclusive bound, then the 3 is the 3rd column which has our x, y, z
+        end_effector_position = T_0_ee[0:3 , 3]
+
+        return end_effector_position
+
 
     def inverse_kinematics(self, target_ee, initial_guess=[0, 0, 0]):
         def cost_function(theta):
             # Compute the cost function and the L1 norm of the error
             # return the cost and the L1 norm of the error
             ################################################################################################
-            # TODO: Implement the cost function
+            current_ee = self.forward_kinematics(theta[0], theta[1], theta[2])
+            cost_dist = target_ee - current_ee
             ################################################################################################
-            return None, None
+            return np.sum(cost_dist * cost_dist), cost_dist
 
         def gradient(theta, epsilon=1e-3):
             # Compute the gradient of the cost function using finite differences
             ################################################################################################
-            # TODO: Implement the gradient computation
+            theta1 = theta.copy()
+            theta1[0] = theta1[0] + epsilon
+            grad1 = (cost_function(theta1)[0] - cost_function(theta)[0])/epsilon
+
+            theta2 = theta.copy()
+            theta2[1] = theta2[1] + epsilon
+            grad2 = (cost_function(theta2)[0] - cost_function(theta)[0])/epsilon
+
+            theta3 = theta.copy()
+            theta3[2] = theta3[2] + epsilon
+            grad3 = (cost_function(theta3)[0] - cost_function(theta)[0])/epsilon
+
             ################################################################################################
-            return
+            return np.array(grad1, grad2, grad3)
 
         theta = np.array(initial_guess)
-        learning_rate = None # TODO: Set the learning rate
-        max_iterations = None # TODO: Set the maximum number of iterations
-        tolerance = None # TODO: Set the tolerance for the L1 norm of the error
+        learning_rate = 10**-3 # TODO: Set the learning rate
+        max_iterations = 200 # TODO: Set the maximum number of iterations
+        tolerance = 0.05 # TODO: Set the tolerance for the L1 norm of the error
 
         cost_l = []
         for _ in range(max_iterations):
@@ -83,9 +155,8 @@ class InverseKinematics(Node):
 
             # Update the theta (parameters) using the gradient and the learning rate
             ################################################################################################
-            # TODO: Implement the gradient update
             # TODO (BONUS): Implement the (quasi-)Newton's method for faster convergence
-            theta -= None
+            theta -= learning_rate * grad
             ################################################################################################
 
             cost, l1 = cost_function(theta)
