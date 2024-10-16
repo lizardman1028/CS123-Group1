@@ -1,4 +1,4 @@
-zimport rclpy
+import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
@@ -74,10 +74,10 @@ class InverseKinematics(Node):
         rf_ee_triangle_positions = np.array([touch_down_position, stand_position_1, stand_position_2, stand_position_3, liftoff_position, mid_swing_position]) + rf_ee_offset
         
         lf_ee_offset = np.array([0.06, 0.09, 0])
-        lf_ee_triangle_positions = np.array([touch_down_position, stand_position_1, stand_position_2, stand_position_3, liftoff_position, mid_swing_position]) + lf_ee_offset
+        lf_ee_triangle_positions = np.array([stand_position_3, liftoff_position, mid_swing_position, touch_down_position, stand_position_1, stand_position_2]) + lf_ee_offset
         
         rb_ee_offset = np.array([-0.11, -0.09, 0])
-        rb_ee_triangle_positions = np.array([touch_down_position, stand_position_1, stand_position_2, stand_position_3, liftoff_position, mid_swing_position]) + rb_ee_offset
+        rb_ee_triangle_positions = np.array([stand_position_3, liftoff_position, mid_swing_position, touch_down_position, stand_position_1, stand_position_2]) + rb_ee_offset
         
         lb_ee_offset = np.array([-0.11, 0.09, 0])
         lb_ee_triangle_positions = np.array([touch_down_position, stand_position_1, stand_position_2, stand_position_3, liftoff_position, mid_swing_position]) + lb_ee_offset
@@ -195,23 +195,15 @@ class InverseKinematics(Node):
 
         return theta
 
-    def interpolate_triangle(self, t):
+    def interpolate_triangle(self, t, leg_index):
         # Intepolate between the three triangle positions in the self.ee_triangle_positions
         # based on the current time t
         ################################################################################################
-        if (t % 3 < 1):
-            x = np.interp(t%1, [0, 1], [self.ee_triangle_positions[0][0], self.ee_triangle_positions[1][0]])
-            y = np.interp(t%1, [0, 1], [self.ee_triangle_positions[0][1], self.ee_triangle_positions[1][1]])
-            z = np.interp(t%1, [0, 1], [self.ee_triangle_positions[0][2], self.ee_triangle_positions[1][2]])
-        elif (t % 3 < 2):
-            x = np.interp(t%1, [0, 1], [self.ee_triangle_positions[1][0], self.ee_triangle_positions[2][0]])
-            y = np.interp(t%1, [0, 1], [self.ee_triangle_positions[1][1], self.ee_triangle_positions[2][1]])
-            z = np.interp(t%1, [0, 1], [self.ee_triangle_positions[1][2], self.ee_triangle_positions[2][2]])
-        else:
-            x = np.interp(t%1, [0, 1], [self.ee_triangle_positions[2][0], self.ee_triangle_positions[0][0]])
-            y = np.interp(t%1, [0, 1], [self.ee_triangle_positions[2][1], self.ee_triangle_positions[0][1]])
-            z = np.interp(t%1, [0, 1], [self.ee_triangle_positions[2][2], self.ee_triangle_positions[0][2]])        
-        ################################################################################################
+        leg_triangle_positions = self.ee_triangle_positions[leg_index]
+        x = np.interp(t%1, [0, 1], [leg_triangle_positions[t%6][0], leg_triangle_positions[(t+1)%6][0]])
+        y = np.interp(t%1, [0, 1], [leg_triangle_positions[t%6][1], leg_triangle_positions[(t+1)%6][1]])
+        z = np.interp(t%1, [0, 1], [leg_triangle_positions[t%6][2], leg_triangle_positions[(t+1)%6][2]])
+
         return np.array([x, y, z])
 
     def cache_target_joint_positions(self):
