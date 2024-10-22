@@ -76,10 +76,10 @@ class InverseKinematics(Node):
         lf_ee_offset = np.array([0.06, 0.09, 0])
         lf_ee_triangle_positions = np.array([stand_position_3, liftoff_position, mid_swing_position, touch_down_position, stand_position_1, stand_position_2]) + lf_ee_offset
         
-        rb_ee_offset = np.array([-0.11, -0.09, 0])
-        rb_ee_triangle_positions = np.array([stand_position_3, liftoff_position, mid_swing_position, touch_down_position, stand_position_1, stand_position_2]) + rb_ee_offset
+        rb_ee_offset = np.array([-0.13, -0.09, 0])
+        rb_ee_triangle_positions = np.array([stand_position_3, liftoff_position, mid_swing_position, touch_down_position, stand_position_1, stand_position_2 ]) + rb_ee_offset
         
-        lb_ee_offset = np.array([-0.11, 0.09, 0])
+        lb_ee_offset = np.array([-0.13, 0.09, 0])
         lb_ee_triangle_positions = np.array([touch_down_position, stand_position_1, stand_position_2, stand_position_3, liftoff_position, mid_swing_position]) + lb_ee_offset
 
 
@@ -96,6 +96,7 @@ class InverseKinematics(Node):
         self.pd_timer = self.create_timer(self.pd_timer_period, self.pd_timer_callback)
         self.ik_timer = self.create_timer(self.ik_timer_period, self.ik_timer_callback)
 
+    # Josh code
 
     def fr_leg_fk(self, theta):
         # Already implemented in Lab 2
@@ -106,22 +107,22 @@ class InverseKinematics(Node):
         T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
         return T_RF_0_ee[:3, 3]
 
-    def fl_leg_fk(self, theta):
-        T_RF_0_1 = translation(0.07500, 0.04450, 0) @ rotation_x(1.57080) @ rotation_z(-1 * theta[0])
-        T_RF_1_2 = translation(0.0, 0.0, -0.039) @ rotation_y(-1.57080) @ rotation_z(-1 * theta[1])
-        T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(-1 *theta[2])
-        T_RF_3_ee = translation(-0.06231, 0.06216, 0.01800)
-        T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
-        return T_RF_0_ee[:3, 3]
-    
-    # another guess?
     # def fl_leg_fk(self, theta):
-    #     T_RF_0_1 = translation(0.07500, 0.04450, 0) @ rotation_x(-1.57080) @ rotation_z(theta[0])
-    #     T_RF_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(theta[1])
-    #     T_RF_2_3 = translation(0, 0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(theta[2])
-    #     T_RF_3_ee = translation(0.06231, 0.06216, 0.01800)
+    #     T_RF_0_1 = translation(0.07500, 0.04450, 0) @ rotation_x(1.57080) @ rotation_z(-1 * theta[0])
+    #     T_RF_1_2 = translation(0.0, 0.0, -0.039) @ rotation_y(-1.57080) @ rotation_z(-1 * theta[1])
+    #     T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(-1 *theta[2])
+    #     T_RF_3_ee = translation(-0.06231, 0.06216, 0.01800)
     #     T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
     #     return T_RF_0_ee[:3, 3]
+    
+    # another guess?
+    def fl_leg_fk(self, theta):
+        T_RF_0_1 = translation(0.07500, 0.04450, 0) @ rotation_x(-1.57080) @ rotation_z(theta[0])
+        T_RF_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(theta[1])
+        T_RF_2_3 = translation(0, 0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(theta[2])
+        T_RF_3_ee = translation(0.06231, 0.06216, 0.01800)
+        T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+        return T_RF_0_ee[:3, 3]
 
     def br_leg_fk(self, theta):
         T_RF_0_1 = translation(-0.07500, -0.0335, 0) @ rotation_x(1.57080) @ rotation_z(theta[0])
@@ -131,13 +132,67 @@ class InverseKinematics(Node):
         T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
         return T_RF_0_ee[:3, 3]
 
+    # def lb_leg_fk(self, theta):
+    #     T_RF_0_1 = translation(-0.07500, 0.0335, 0) @ rotation_x(1.57080) @ rotation_z(-1 * theta[0])
+    #     T_RF_1_2 = translation(0.0, 0.0, -0.039) @ rotation_y(-1.57080) @ rotation_z(-1 * theta[1])
+    #     T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(-1 *theta[2])
+    #     T_RF_3_ee = translation(-0.06231, 0.06216, 0.01800)
+    #     T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+    #     return T_RF_0_ee[:3, 3]
+    
     def lb_leg_fk(self, theta):
-        T_RF_0_1 = translation(-0.07500, 0.0335, 0) @ rotation_x(1.57080) @ rotation_z(-1 * theta[0])
-        T_RF_1_2 = translation(0.0, 0.0, -0.039) @ rotation_y(-1.57080) @ rotation_z(-1 * theta[1])
-        T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(-1 *theta[2])
-        T_RF_3_ee = translation(-0.06231, 0.06216, 0.01800)
+        T_RF_0_1 = translation(-0.07500, 0.0335, 0) @ rotation_x(-1.57080) @ rotation_z(theta[0])
+        T_RF_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(theta[1])
+        T_RF_2_3 = translation(0, 0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(theta[2])
+        T_RF_3_ee = translation(0.06231, 0.06216, 0.01800)
         T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
         return T_RF_0_ee[:3, 3]
+
+
+
+
+
+    # Nathan code 
+
+    # def fr_leg_fk(self, theta):
+    #     # Already implemented in Lab 2
+    #     T_RF_0_1 = translation(0.07500, -0.04450, 0) @ rotation_x(1.57080) @ rotation_z(theta[0])
+    #     T_RF_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(theta[1])
+    #     T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(theta[2])
+    #     T_RF_3_ee = translation(0.06231, -0.06216, 0.01800)
+    #     T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+    #     return T_RF_0_ee[:3, 3]
+
+    # def fl_leg_fk(self, theta):
+    #     # Already implemented in Lab 2
+    #     T_RF_0_1 = translation(0.07500, 0.04450, 0) @ rotation_x(1.57080) @ rotation_z(-1*theta[0])
+    #     T_RF_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(-1*theta[1])
+    #     T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(-1*theta[2])
+    #     T_RF_3_ee = translation(0.06231, -0.06216, 0.01800)
+    #     T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+    #     return T_RF_0_ee[:3, 3]
+
+    # def br_leg_fk(self, theta):
+    #     # Already implemented in Lab 2
+    #     T_RF_0_1 = translation(-0.07500, -0.0335, 0) @ rotation_x(1.57080) @ rotation_z(theta[0])
+    #     T_RF_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(theta[1])
+    #     T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(theta[2])
+    #     T_RF_3_ee = translation(0.06231, -0.06216, 0.01800)
+    #     T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+    #     return T_RF_0_ee[:3, 3]
+
+    # def lb_leg_fk(self, theta):
+    #     # Already implemented in Lab 2
+    #     T_RF_0_1 = translation(-0.07500, 0.0335, 0) @ rotation_x(1.57080) @ rotation_z(-1*theta[0])
+    #     T_RF_1_2 = translation(0.0, 0.0, 0.039) @ rotation_y(-1.57080) @ rotation_z(-1*theta[1])
+    #     T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(-1*theta[2])
+    #     T_RF_3_ee = translation(0.06231, -0.06216, 0.01800)
+    #     T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+    #     return T_RF_0_ee[:3, 3]
+
+
+
+
     
 
     def forward_kinematics(self, theta):
@@ -160,7 +215,7 @@ class InverseKinematics(Node):
             # Compute the cost function and the L1 norm of the error
             # return the cost and the L1 norm of the error
             ################################################################################################
-            current_ee = self.forward_kinematics(theta[0], theta[1], theta[2])
+            current_ee = leg_forward_kinematics(theta)
             cost_dist = target_ee - current_ee
             ################################################################################################
             return np.sum(cost_dist * cost_dist), np.sum(np.abs(cost_dist))
@@ -183,7 +238,7 @@ class InverseKinematics(Node):
             ################################################################################################
             return np.array([grad1, grad2, grad3])
 
-        theta = np.array(initial_guess)
+        theta = np.array(initial_guess, dtype=float)
         learning_rate = 10 # TODO: Set the learning rate
         max_iterations = 200 # TODO: Set the maximum number of iterations
         tolerance = 1e-3# TODO: Set the tolerance for the L1 norm of the error
@@ -208,10 +263,11 @@ class InverseKinematics(Node):
         # Intepolate between the three triangle positions in the self.ee_triangle_positions
         # based on the current time t
         ################################################################################################
+        t = t * 6
         leg_triangle_positions = self.ee_triangle_positions[leg_index]
-        x = np.interp(t%1, [0, 1], [leg_triangle_positions[t%6][0], leg_triangle_positions[(t+1)%6][0]])
-        y = np.interp(t%1, [0, 1], [leg_triangle_positions[t%6][1], leg_triangle_positions[(t+1)%6][1]])
-        z = np.interp(t%1, [0, 1], [leg_triangle_positions[t%6][2], leg_triangle_positions[(t+1)%6][2]])
+        x = np.interp(t%1, [0, 1], [leg_triangle_positions[int(t)%6][0], leg_triangle_positions[int(t+1)%6][0]])
+        y = np.interp(t%1, [0, 1], [leg_triangle_positions[int(t)%6][1], leg_triangle_positions[int(t+1)%6][1]])
+        z = np.interp(t%1, [0, 1], [leg_triangle_positions[int(t)%6][2], leg_triangle_positions[int(t+1)%6][2]])
 
         return np.array([x, y, z])
 
@@ -223,7 +279,7 @@ class InverseKinematics(Node):
             target_joint_positions_cache.append([])
             target_ee_cache.append([])
             target_joint_positions = [0] * 3
-            for t in np.arange(0, 1, 0.02):
+            for t in np.arange(0, 1, 0.02): # rate of time
                 print(t)
                 target_ee = self.interpolate_triangle(t, leg_index)
                 target_joint_positions = self.inverse_kinematics_single_leg(target_ee, leg_index, initial_guess=target_joint_positions)
