@@ -5,7 +5,7 @@ import pyttsx3
 from openai import OpenAI
 import karel  # Importing your KarelPupper API
 
-client = OpenAI(api_key='TODO')  # Set your OpenAI API key here
+client = OpenAI(api_key='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')  # Set your OpenAI API key here
 
 class GPT4ConversationNode(Node):
     def __init__(self):
@@ -38,7 +38,12 @@ class GPT4ConversationNode(Node):
     # TODO: Implement the query_callback method
     # msg is a String message object that contains the user query. You can extract the query using msg.data
     def query_callback(self, msg):
-        pass
+        user_query = msg.data
+        response = self.get_gpt4_response(user_query)
+
+        response_msg = String()
+        response_msg.data = response
+        self.publisher_.publish(response_msg)
         # Paste in your implementation from simple_gpt_chat.py
         
         # Play the response through the speaker with the play_response method
@@ -49,7 +54,13 @@ class GPT4ConversationNode(Node):
     def get_gpt4_response(self, query):
         try:
             # Making the API call to GPT-4 using OpenAI's Python client
-            prompt = "TODO"
+            prompt = str("using the commands move() turn_left() turn_right() bark() and stop() to control a robot. Here is an example of some code which makes a robot walk forwards then turn around and walk back \n"
+            +"pupper.move()\n"
+            +"pupper.bark()\n"
+            +"pupper.turn_right()\n"
+            +"pupper.turn_right()\n"
+            +"pupper.move()\n")
+
             response = client.chat.completions.create(model="gpt-4",  # Model identifier, assuming GPT-4 is used
             messages=[
                 {"role": "system", "content": prompt},
@@ -78,6 +89,19 @@ class GPT4ConversationNode(Node):
         response = response.lower()
         self.get_logger().info(f"Response: {response}")
         # TODO: Implement the robot command execution logic, in a large if-else statement. Your conditionals should be set based on the expected commands from GPT-4, and the corresponding methods should be called on the KarelPupper object.
+        for line in response.split("\n"):
+            line = line.strip()
+            if "pupper.move()" in line:
+                self.pupper.move()
+            elif "pupper.bark()" in line:
+                self.pupper.bark()
+            elif "pupper.turn_left()" in line:
+                self.pupper.turn_left()
+            elif "pupper.turn_right()" in line:
+                self.pupper.turn_right()
+            elif "pupper.stop()" in line:
+                self.pupper.stop()
+
         pass
 
 def main(args=None):

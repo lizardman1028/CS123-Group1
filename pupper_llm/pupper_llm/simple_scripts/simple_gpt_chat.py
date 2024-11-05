@@ -3,7 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from openai import OpenAI
 
-client = OpenAI(api_key='TODO')
+client = OpenAI(api_key='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')
 
 class GPT4ConversationNode(Node):
     def __init__(self):
@@ -31,7 +31,12 @@ class GPT4ConversationNode(Node):
     # TODO: Implement the query_callback method
     # msg is a String message object that contains the user query. You can extract the query using msg.data
     def query_callback(self, msg):
-        pass
+        user_query = msg.data
+        response = self.get_gpt4_response(user_query)
+
+        response_msg = String()
+        response_msg.data = response
+        self.publisher_.publish(response_msg)
         # Extract the user query from the message using the data attribute of message
         
         # Call GPT-4 API to get the response. Use the get_gpt4_response method and pass in the query
@@ -42,13 +47,19 @@ class GPT4ConversationNode(Node):
         
         # DEBUG LOGGERS: Uncomment the following line to print the query and response (you may have to change the variable names)
         
-        # self.get_logger().info(f"Received user query: {user_query}") 
-        # self.get_logger().info(f"Published GPT-4 response: {response}")
+        self.get_logger().info(f"Received user query: {user_query}") 
+        self.get_logger().info(f"Published GPT-4 response: {response}")
 
     def get_gpt4_response(self, query):
         try:
             # Making the API call to GPT-4o using OpenAI's Python client
-            prompt = "TODO"
+            prompt = str("using the commands move() turn_left() turn_right() bark() and stop() to control a robot, please don't use any other control flow. Here is an example of some code which makes a robot walk forwards then turn around and walk back \n"
+            +"pupper.move()\n"
+            +"pupper.bark()\n"
+            +"pupper.turn_right()\n"
+            +"pupper.turn_right()\n"
+            +"pupper.move()\n")
+
             response = client.chat.completions.create(model="gpt-4",  # Model identifier, assuming GPT-4 is used
             messages=[
                 {"role": "system", "content": prompt},
