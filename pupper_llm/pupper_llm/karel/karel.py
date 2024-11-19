@@ -25,6 +25,17 @@ class KarelPupper:
         time.sleep(1)
         self.stop()
 
+    def turn(self, angle):
+        pass
+        move_cmd = Twist()
+        move_cmd.linear.x = 0.0
+        move_cmd.angular.z = angle
+        self.publisher.publish(move_cmd)
+        rclpy.spin_once(self.node, timeout_sec=1.0)
+        self.node.get_logger().info('Turn left...')
+        time.sleep(1)
+        self.stop()
+
     def turn_left(self):
         pass
         move_cmd = Twist()

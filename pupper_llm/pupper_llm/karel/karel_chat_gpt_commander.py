@@ -54,11 +54,19 @@ class GPT4ConversationNode(Node):
     def get_gpt4_response(self, query):
         try:
             # Making the API call to GPT-4 using OpenAI's Python client
-            prompt = str("using the commands move() turn_left() turn_right() bark() and stop() to control a robot. Here is an example of some code which makes a robot walk forwards then turn around and walk back \n"
+            # prompt = str("using the commands move() turn_left() turn_right() bark() and stop() to control a robot. Here is an example of some code which makes a robot walk forwards then turn around and walk back \n"
+            # +"pupper.move()\n"
+            # +"pupper.bark()\n"
+            # +"pupper.turn_right()\n"
+            # +"pupper.turn_right()\n"
+            # +"pupper.move()\n")
+
+            # Making the API call to GPT-4 using OpenAI's Python client
+            prompt = str("using the commands move() and turn(angle) to control a robot to draw a triangle. Here is an example of some code which makes a robot draw an equilateral triangle \n"
             +"pupper.move()\n"
-            +"pupper.bark()\n"
-            +"pupper.turn_right()\n"
-            +"pupper.turn_right()\n"
+            +"pupper.turn(1.047)\n"
+            +"pupper.move()\n"
+            +"pupper.turn(1.047)\n"
             +"pupper.move()\n")
 
             response = client.chat.completions.create(model="gpt-4",  # Model identifier, assuming GPT-4 is used
