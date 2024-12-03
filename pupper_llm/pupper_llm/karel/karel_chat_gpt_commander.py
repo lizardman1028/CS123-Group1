@@ -73,7 +73,9 @@ class GPT4ConversationNode(Node):
 
 
            # Making the API call to GPT-4 using OpenAI's Python client
-           prompt = str("using the commands move() and turn(radians) to control a robot to draw a shape where radians must be a numeric decimal. Here is an example of some code which makes a robot draw an equilateral triangle \n"
+           prompt = str("using the commands move() and turn() to control a robot to draw a visual representation of a given user input." +
+                        "move() moves in a straight line and turn takes in a radian input, which must be a numeric decimal." + 
+                        "Here is an example of some code which makes a robot draw an equilateral triangle, as directed by the user: \n"
            +"pupper.move()\n"
            +"pupper.turn(1.047)\n"
            +"pupper.move()\n"
