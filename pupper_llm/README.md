@@ -1,8 +1,22 @@
-# Group 1 Final Project Code
+# Group 1 Final Project
 
 Slides: https://docs.google.com/presentation/d/1PkUF8yBt4b4o_hlcP-XUiFB2-tKcdd_b2StPuGY-5MI/edit?usp=sharing
 
-Our final project was for to use Pupper as a mechanism for artistic creation. Details can be found in the slides above.
+Our final project was to use Pupper as a mechanism for artistic creation. More details + demo videos can be found in the slides above.
+
+How to run the code:
+1. Run ./run.sh in the lab 7 folder
+2. Run simple_scripts/whisper_ping.py in pupper_llm (note: make sure the arduino is plugged in before this)
+3. Run karel/karel_chat_gpt_commander.py in pupper_llm
+
+Dependencies (same as in lab 6):
+pip install pygame
+pip install simpleaudio
+pip install openai
+pip install openai-whisper
+pip install sounddevice
+pip install pyttsx3
+pip install -r pupper_llm/Robot_Commands/requirements.txt
 
 Hardware changes includes:
 - Adding the marker attachment to the upper
