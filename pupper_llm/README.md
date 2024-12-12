@@ -8,7 +8,7 @@ Hardware changes includes:
 - Adding the marker attachment to the upper
   - Custom-designed Lego joint, enabling precise movement and control of marker
   - Rubber bands made it so that marker was always in contact with the floor
-  - Holes through sides, for securing the marker and allowing adjustment
+  - Drilled holes through Pupper's sides to secure the marker while it walks/turns
 - Soldering an arduino board with a button that can be used to trigger Pupper listening for what to draw
 - Mounting speaker and arduino board to the Pupper so that it can walk around on its own without these getting in the way
 
