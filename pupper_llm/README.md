@@ -14,7 +14,7 @@ Hardware changes includes:
 
 Software changes include:
 - whisper_ping.py:
-  - Now waits for serial input from the arduino button to trigger listening + whisper API
+  - Now waits in an infinite loop for serial input from the arduino button to trigger listening + whisper API
   - Plays audio to ask for instructions and when it understands those instructions
 - karel_chat_gpt_commander.py:
   - Updated prompt to include new Karel API methods + an example of drawing a few shapes
