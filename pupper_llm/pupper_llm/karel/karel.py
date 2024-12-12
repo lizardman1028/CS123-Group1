@@ -6,89 +6,98 @@ from geometry_msgs.msg import Twist
 import simpleaudio as sa
 import pygame
 
-
 class KarelPupper:
-   def start():
-       rclpy.init()
+    def start():
+        rclpy.init()
 
+    def __init__(self):
+        # rclpy.init()
+        self.node = Node('karel_node')
+        self.publisher = self.node.create_publisher(Twist, 'cmd_vel', 10)
 
-   def __init__(self):
-       # rclpy.init()
-       self.node = Node('karel_node')
-       self.publisher = self.node.create_publisher(Twist, 'cmd_vel', 10)
+    def move(self):
+        move_cmd = Twist()
+        move_cmd.linear.x = 0.6 #1.0
+        move_cmd.angular.z = 0.0 
+        self.publisher.publish(move_cmd)
+        rclpy.spin_once(self.node, timeout_sec=1.0)
+        self.node.get_logger().info('Move forward...')
+        time.sleep(1)
+        self.stop()
 
+    def move_backwards(self):
+        move_cmd = Twist()
+        move_cmd.linear.x = -0.1 #1.0
+        move_cmd.angular.z = 0.0 
+        self.publisher.publish(move_cmd)
+        rclpy.spin_once(self.node, timeout_sec=1.0)
+        self.node.get_logger().info('Move forward...')
+        time.sleep(1)
+        self.stop()
 
-   def move(self):
-       move_cmd = Twist()
-       move_cmd.linear.x = 1.0
-       move_cmd.angular.z = 0.0
-       self.publisher.publish(move_cmd)
-       rclpy.spin_once(self.node, timeout_sec=1.0)
-       self.node.get_logger().info('Move forward...')
-       time.sleep(1)
-       self.stop()
+    def turn(self, radians):
+        move_cmd = Twist()
+        move_cmd.linear.x = 0.15
+        move_cmd.angular.z = (radians / 2.0) + 0.11
+        self.publisher.publish(move_cmd)
+        rclpy.spin_once(self.node, timeout_sec=1.0)
+        self.node.get_logger().info('Turn left...')
+        time.sleep(1)
+        self.stop()
 
+    def turn_left(self):
+        pass
+        move_cmd = Twist()
+        move_cmd.linear.x = 0.0
+        move_cmd.angular.z = 1.5 
+        self.publisher.publish(move_cmd)
+        rclpy.spin_once(self.node, timeout_sec=1.0)
+        self.node.get_logger().info('Turn left...')
+        time.sleep(1)
+        self.stop()
 
-   def turn(self, radians):
-       pass
-       move_cmd = Twist()
-       move_cmd.linear.x = 0.0
-       move_cmd.angular.z = radians
-       self.publisher.publish(move_cmd)
-       rclpy.spin_once(self.node, timeout_sec=1.0)
-       self.node.get_logger().info('Turn left...')
-       time.sleep(1)
-       self.stop()
-
-
-   def turn_left(self):
-       pass
-       move_cmd = Twist()
-       move_cmd.linear.x = 0.0
-       move_cmd.angular.z = 1.5
-       self.publisher.publish(move_cmd)
-       rclpy.spin_once(self.node, timeout_sec=1.0)
-       self.node.get_logger().info('Turn left...')
-       time.sleep(1)
-       self.stop()
-
-
-   def turn_right(self):
-       move_cmd = Twist()
-       move_cmd.linear.x = 0.0
-       move_cmd.angular.z = -1.5
-       self.publisher.publish(move_cmd)
-       rclpy.spin_once(self.node, timeout_sec=1.0)
-       self.node.get_logger().info('Turn right...')
+    def turn_right(self):
+        move_cmd = Twist()
+        move_cmd.linear.x = 0.0
+        move_cmd.angular.z = -1.5 
+        self.publisher.publish(move_cmd)
+        rclpy.spin_once(self.node, timeout_sec=1.0)
+        self.node.get_logger().info('Turn right...')
 #        time.sleep(0.5)
-       self.stop()
+        self.stop()
 
-
-   def bark(self):
-       self.node.get_logger().info('Bark...')
-       pygame.mixer.init()
-       bark_sound = pygame.mixer.Sound('/home/pi/pupper_llm/sounds/dog_bark.wav')
-       bark_sound.play()
-      
+    def bark(self):
+        self.node.get_logger().info('Bark...')
+        pygame.mixer.init()
+        bark_sound = pygame.mixer.Sound('/home/pi/pupper_llm/sounds/dog_bark.wav')
+        bark_sound.play()
 #        time.sleep(0.5)
-       self.stop()
+        self.stop()
+
+    def done_sound(self):
+        pygame.mixer.init()
+        done_sound = pygame.mixer.Sound('/home/pi/pupper_llm/sounds/done.wav')
+        done_sound.play()
+        self.stop()
+
+    
+    def sleep(self):
+        time.sleep(3)
 
 
-
-
-   def stop(self):
-       self.node.get_logger().info('Stopping...')
-       move_cmd = Twist()
-       move_cmd.linear.x = 0.0
-       move_cmd.linear.y = 0.0
-       move_cmd.linear.z = 0.0
-       move_cmd.angular.x = 0.0
-       move_cmd.angular.y = 0.0
-       move_cmd.angular.z = 0.0
-       self.publisher.publish(move_cmd)
-       rclpy.spin_once(self.node, timeout_sec=1.0)
-  
-   def __del__(self):
-       self.node.get_logger().info('Tearing down...')
-       self.node.destroy_node()
-       rclpy.shutdown()
+    def stop(self):
+        self.node.get_logger().info('Stopping...')
+        move_cmd = Twist()
+        move_cmd.linear.x = 0.0
+        move_cmd.linear.y = 0.0
+        move_cmd.linear.z = 0.0
+        move_cmd.angular.x = 0.0
+        move_cmd.angular.y = 0.0
+        move_cmd.angular.z = 0.0
+        self.publisher.publish(move_cmd)
+        rclpy.spin_once(self.node, timeout_sec=1.0)
+    
+    def __del__(self):
+        self.node.get_logger().info('Tearing down...')
+        self.node.destroy_node()
+        rclpy.shutdown()

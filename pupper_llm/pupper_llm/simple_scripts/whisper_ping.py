@@ -3,6 +3,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 import sounddevice as sd
 from openai import OpenAI
+import serial
 
 client = OpenAI(api_key='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')
 import numpy as np
@@ -10,8 +11,11 @@ import time
 import io
 import wave
 import whisper as wh
-
+import pygame
 # Set your OpenAI API key here
+
+BOARD_NAME = "/dev/ttyACM0"
+
 
 class CommandLinePublisher(Node):
     def __init__(self):
@@ -47,7 +51,16 @@ class CommandLinePublisher(Node):
             print(f"Error during transcription: {e}")
             return None
 
+def draw_sound():
+    pygame.mixer.init()
+    done_sound = pygame.mixer.Sound('/home/pi/pupper_llm/sounds/draw.wav')
+    done_sound.play()
+    time.sleep(2)
 
+def think_sound():
+    pygame.mixer.init()
+    done_sound = pygame.mixer.Sound('/home/pi/pupper_llm/sounds/think.wav')
+    done_sound.play()
 
 def record_audio(duration=5, sample_rate=16000):
     print("Recording audio...")
@@ -79,6 +92,7 @@ def main(args=None):
     command_publisher.get_logger().info("Starting recording.")
 
     try:
+        draw_sound()
         audio_data = record_audio(duration=5.0)
         # Save the recorded audio to a WAV file
         wav_io = audio_to_wav(audio_data)
@@ -91,6 +105,7 @@ def main(args=None):
         t1 = time.time()
         user_input = command_publisher.transcribe_audio_with_whisper(filename)
         t2 = time.time()
+        think_sound()
         
         command_publisher.get_logger().info(f"Time taken: {t2 - t1}")
         # If the user said 'exit', stop the loop
@@ -115,4 +130,12 @@ def main(args=None):
     rclpy.shutdown()
 
 if __name__ == '__main__':
-    main()
+    ser = serial.Serial(BOARD_NAME, 9600, timeout=1)
+    ser.reset_input_buffer()
+    while True:
+        while True:
+            if ser.in_waiting > 0:
+                line = ser.readline().decode('utf-8').rstrip()
+                print(line)
+                break
+        main()
